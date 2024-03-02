@@ -5,7 +5,6 @@ from .models import Profesor
 #from .filters import ProfesorFilter, ArticuloFilter, LibroFilter
 from .serializers import ProfesorSerializer
 
-
 class ProfesorListCreateView(generics.ListCreateAPIView):
     queryset = Profesor.objects.all()
     serializer_class = ProfesorSerializer
