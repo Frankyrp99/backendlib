@@ -19,7 +19,8 @@ class TipoPublicacion(models.TextChoices):
 class Profesor(models.Model):
     nombre = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
-    titulo_recurso = models.CharField(max_length=200)
+    titulo_recurso = models.CharField(max_length=500)
+    departamento = models.CharField(max_length=200, blank=True)
     tomo = models.CharField(max_length=50, blank=True)
     folio = models.CharField(max_length=50, blank=True)
     tipo_publicacion = models.CharField(max_length=50)
@@ -31,7 +32,7 @@ class Profesor(models.Model):
     base_de_datos = models.BooleanField(default=False)
     url = models.URLField(blank=True)
     tipo_recurso = models.CharField(max_length=50)
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.nombre
