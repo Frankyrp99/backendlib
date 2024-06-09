@@ -1,13 +1,46 @@
 from django.urls import path
 from profesor.views import (
-    ProfesorListCreateView, ProfesorRetrieveUpdateDestroyView,
-
+    ProfesorListCreateView,
+    ProfesorRetrieveUpdateDestroyView,
+    TutoListCreateView,
+    TutoRetrieveUpdateDestroyView,
+    BiblioListCreateView,
+    BiblioRetrieveUpdateDestroyView,
+    ReporteDepartamentoView,
+    ReporteTotalAvalessPorDepartamentoView,
 )
 
 urlpatterns = [
-    
-    path('profesores/', ProfesorListCreateView.as_view(), name='profesor-list'),
-    path('profesores/<int:pk>/',
-         ProfesorRetrieveUpdateDestroyView.as_view(), name='profesor-detail'),
-    
+    # avales de publicacion
+    path("profesores/", ProfesorListCreateView.as_view(), name="profesor-list"),
+    path(
+        "profesores/<int:pk>/",
+        ProfesorRetrieveUpdateDestroyView.as_view(),
+        name="profesor-detail",
+    ),
+    # avales de tutorias
+    path("avales_tuto/", TutoListCreateView.as_view(), name="avles-tuto-list"),
+    path(
+        "avales_tuto/<int:pk>/",
+        TutoRetrieveUpdateDestroyView.as_view(),
+        name="avales-tuto-detail",
+    ),
+    # avales de tutorias
+    path("avales_biblio/", BiblioListCreateView.as_view(), name="avles-biblio-list"),
+    path(
+        "avales_biblio/<int:pk>/",
+        BiblioRetrieveUpdateDestroyView.as_view(),
+        name="avales-biblio-detail",
+    ),
+    # reportes
+    path(
+        "reporte-departamento/<str:departamento>/",
+        ReporteDepartamentoView.as_view(),
+        name="reporte_departamento",
+    ),
+    path(
+        "reporte-total-avaless-por-departamento/",
+        ReporteTotalAvalessPorDepartamentoView.as_view(),
+        name="reporte-total-avaless-por-departamento",
+    ),
 ]

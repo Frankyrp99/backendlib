@@ -8,5 +8,5 @@ urlpatterns = [
     path("users/", views.RetriveUpdateUserView.as_view()),
     path('user/<int:pk>/', views.UserDeleteView.as_view()),
     path('token/', views.CreateTokenView.as_view()),
-    path('token/refresh/', views.CustomObtainAuthToken.as_view()),
+    path('token/refresh/', views.CreateTokenView.as_view()),
 ]

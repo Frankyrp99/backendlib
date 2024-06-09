@@ -1,19 +1,19 @@
 from django.db import models
-from django.core.validators import RegexValidator
-from django.utils import timezone
+
+
 
 class FormatoLibro(models.TextChoices):
-    IMPRESO = 'IMPRESO', 'Libro Impreso'
-    DIGITAL = 'DIGITAL', 'Libro Digital'
-    RIMPRESA = 'RIMPRESA', 'Revista Impresa'
-    RDIGITAL = 'DDIGITAL', 'Revista Digital'
+    IMPRESO = "IMPRESO", "Libro Impreso"
+    DIGITAL = "DIGITAL", "Libro Digital"
+    RIMPRESA = "RIMPRESA", "Revista Impresa"
+    RDIGITAL = "DDIGITAL", "Revista Digital"
 
 
 class TipoPublicacion(models.TextChoices):
-    LIBRO = 'LIBRO', 'Libro'
-    CAPITULO = 'CAPITULO', 'Capítulo'
-    EPIGRAFE = 'EPIGRAFE', 'Epígrafe'
-    ARTICULO = 'ARTICULO', 'Artículo'
+    LIBRO = "LIBRO", "Libro"
+    CAPITULO = "CAPITULO", "Capítulo"
+    EPIGRAFE = "EPIGRAFE", "Epígrafe"
+    ARTICULO = "ARTICULO", "Artículo"
 
 
 class Profesor(models.Model):
@@ -32,8 +32,46 @@ class Profesor(models.Model):
     base_de_datos = models.BooleanField(default=False)
     url = models.URLField(blank=True)
     tipo_recurso = models.CharField(max_length=50)
-    fecha = models.DateField(auto_now_add=True)
+    fecha = models.DateField(editable=True)
+
+    @property
+    def nombre_completo(self):
+        return f"{self.nombre} {self.apellidos}"
 
     def __str__(self):
-        return self.nombre
+        return str(self.nombre)
+
+
+class avales_tuto(models.Model):
+    nombre = models.CharField(max_length=100)
+    apellidos = models.CharField(max_length=100)
+    titulo_recurso = models.CharField(max_length=500)
+    departamento = models.CharField(max_length=200, blank=True)
+    tomo = models.CharField(max_length=50, blank=True)
+    folio = models.CharField(max_length=50, blank=True)
+    fecha = models.DateField(editable=True)
+
+    @property
+    def nombre_completo(self):
+        return f"{self.nombre} {self.apellidos}"
+
+    def __str__(self):
+        return str(self.nombre)
+
+
+class avales_biblio(models.Model):
+    nombre = models.CharField(max_length=100)
+    apellidos = models.CharField(max_length=100)
+    titulo_recurso = models.CharField(max_length=500)
+    departamento = models.CharField(max_length=200, blank=True)
+    tomo = models.CharField(max_length=50, blank=True)
+    folio = models.CharField(max_length=50, blank=True)
+    fecha = models.DateField(editable=True)
+
+    @property
+    def nombre_completo(self):
+        return f"{self.nombre} {self.apellidos}"
+
+    def __str__(self):
+        return str(self.nombre)
 
