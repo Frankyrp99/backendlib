@@ -15,8 +15,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["nombre", "apellidos", "email", "password", "role"]
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ["id","nombre", "apellidos", "email", "password", "role"]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.role == "admin":
+            representation["password"] = instance.password
+        return representation
 
     def create(self, validated_data):
         user = get_user_model().objects.create_user(**validated_data)

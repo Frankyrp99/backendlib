@@ -64,21 +64,19 @@ class ReporteDepartamentoView(ListAPIView):
             + list(avales_tuto_filtrados)
             + list(avales_biblio_filtrados)
         )
-        print(queryset)
         return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        # Procesar los avales para organizarlos por fecha
         reporte = {}
         for avel in queryset:
-            fecha = avel.fecha.strftime("%d-%m-%Y")  # Formatear la fecha como desees
+            fecha = avel.fecha.strftime("%d-%m-%Y")
             if fecha not in reporte:
                 reporte[fecha] = []
             reporte[fecha].append(
                 {
-                    "tipo": type(avel).__name__,  # Identificar el tipo de avel
+                    "tipo": type(avel).__name__,
                     "nombre_completo": getattr(
                         avel, "nombre_completo", None
                     ),  # Usar el nombre completo si está disponible
