@@ -110,3 +110,41 @@ class ReporteTotalAvalessPorDepartamentoView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         return JsonResponse(queryset)
+
+
+class ReporteTotalAvalessPorFechaView(ListAPIView):
+    serializer_class = None
+
+    def get_queryset(self):
+        # Inicializamos el diccionario para almacenar los avales por fecha completo (año, mes, día)
+        avales_por_fecha_completa = defaultdict(lambda: defaultdict(int))
+
+        # Definimos los modelos relevantes
+        modelos_relevantes = [Profesor, avales_tuto, avales_biblio]
+
+        # Iteramos sobre todos los modelos relevantes
+        for modelo in modelos_relevantes:
+            for obj in modelo.objects.all():
+                if hasattr(obj, "fecha") and obj.fecha:
+                    # Obtenemos la fecha completa en formato YYYY-MM-DD
+                    fecha_formateada = obj.fecha.strftime("%Y-%m-%d")
+                    # Extraemos el año, mes y día para usarlos como claves
+                    año, mes, dia = fecha_formateada.split("-")
+                    # Usamos el año, mes y día como clave en nuestro diccionario
+                    clave_fecha = f"{año}"
+                    avales_por_fecha_completa[clave_fecha][obj.departamento] += 1
+
+        reporte = {}
+        for fecha_completa, departamentos in avales_por_fecha_completa.items():
+            total_avales = sum(departamentos.values())
+            reporte[fecha_completa] = {
+                "fecha": fecha_completa,
+                "total": total_avales,
+                "departamentos": departamentos,
+            }
+
+        return reporte
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        return JsonResponse(queryset, safe=False)

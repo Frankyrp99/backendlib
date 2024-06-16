@@ -8,6 +8,7 @@ from profesor.views import (
     BiblioRetrieveUpdateDestroyView,
     ReporteDepartamentoView,
     ReporteTotalAvalessPorDepartamentoView,
+    ReporteTotalAvalessPorFechaView,
 )
 
 urlpatterns = [
@@ -42,5 +43,10 @@ urlpatterns = [
         "reporte-total-avaless-por-departamento/",
         ReporteTotalAvalessPorDepartamentoView.as_view(),
         name="reporte-total-avaless-por-departamento",
+    ),
+    path(
+        "reporte-total-avaless-por-fecha/",
+        ReporteTotalAvalessPorFechaView.as_view(),
+        name="reporte-total-avaless-por-fecha",
     ),
 ]
