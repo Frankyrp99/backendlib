@@ -9,6 +9,8 @@ from profesor.views import (
     ReporteDepartamentoView,
     ReporteTotalAvalessPorDepartamentoView,
     ReporteTotalAvalessPorFechaView,
+    AutoresListAPIView,
+    AvalProfesorListView,
 )
 
 urlpatterns = [
@@ -48,5 +50,11 @@ urlpatterns = [
         "reporte-total-avaless-por-fecha/",
         ReporteTotalAvalessPorFechaView.as_view(),
         name="reporte-total-avaless-por-fecha",
+    ),
+    path("autores/", AutoresListAPIView.as_view(), name="api-list-autores"),
+    path(
+        "avales-profesor/",
+        AvalProfesorListView.as_view(),
+        name="api-avales-profesor",
     ),
 ]

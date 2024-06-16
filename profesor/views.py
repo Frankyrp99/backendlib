@@ -116,21 +116,19 @@ class ReporteTotalAvalessPorFechaView(ListAPIView):
     serializer_class = None
 
     def get_queryset(self):
-        # Inicializamos el diccionario para almacenar los avales por fecha completo (año, mes, día)
+
         avales_por_fecha_completa = defaultdict(lambda: defaultdict(int))
 
-        # Definimos los modelos relevantes
         modelos_relevantes = [Profesor, avales_tuto, avales_biblio]
 
-        # Iteramos sobre todos los modelos relevantes
         for modelo in modelos_relevantes:
             for obj in modelo.objects.all():
                 if hasattr(obj, "fecha") and obj.fecha:
-                    # Obtenemos la fecha completa en formato YYYY-MM-DD
+
                     fecha_formateada = obj.fecha.strftime("%Y-%m-%d")
-                    # Extraemos el año, mes y día para usarlos como claves
+
                     año, mes, dia = fecha_formateada.split("-")
-                    # Usamos el año, mes y día como clave en nuestro diccionario
+
                     clave_fecha = f"{año}"
                     avales_por_fecha_completa[clave_fecha][obj.departamento] += 1
 
@@ -148,3 +146,70 @@ class ReporteTotalAvalessPorFechaView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         return JsonResponse(queryset, safe=False)
+
+
+class AutoresListAPIView(ListAPIView):
+    serializer_class = None  # No necesitamos especificar un serializer_class aquí
+
+    def list(self, request, *args, **kwargs):
+        # Inicializar una lista vacía para almacenar los objetos de autor
+        autores = []
+
+        # Agregar información de Profesor
+        profesores = Profesor.objects.all()
+        for profesor in profesores:
+            autor_info = {
+                "nombre": profesor.nombre,
+                "apellidos": profesor.apellidos,
+                "departamento": profesor.departamento,
+            }
+            autores.append(autor_info)
+
+        # Agregar información de avales_tuto
+        tutores = avales_tuto.objects.all()
+        for tutor in tutores:
+            autor_info = {
+                "nombre": tutor.nombre,
+                "apellidos": tutor.apellidos,
+                "departamento": tutor.departamento,
+            }
+            autores.append(autor_info)
+
+        # Agregar información de avales_biblio
+        biblitecos = avales_biblio.objects.all()
+        for bibliteco in biblitecos:
+            autor_info = {
+                "nombre": bibliteco.nombre,
+                "apellidos": bibliteco.apellidos,
+                "departamento": bibliteco.departamento,
+            }
+            autores.append(autor_info)
+
+        # Devolver la lista de autores como una respuesta JSON
+        return JsonResponse(autores, safe=False)
+
+
+class AvalProfesorListView(ListAPIView):
+    serializer_class = None
+
+    def get_queryset(self):
+        nombre = self.request.query_params.get("nombre")
+        apellidos = self.request.query_params.get("apellidos")
+
+        profesores = Profesor.objects.filter(
+            nombre__icontains=nombre, apellidos__icontains=apellidos
+        )
+        tutores = avales_tuto.objects.filter(
+            nombre__icontains=nombre, apellidos__icontains=apellidos
+        )
+        biblitecos = avales_biblio.objects.filter(
+            nombre__icontains=nombre, apellidos__icontains=apellidos
+        )
+        avales = list(profesores) + list(tutores) + list(biblitecos)
+        return avales
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        avales_dict = [obj.__dict__ for obj in queryset]
+        return JsonResponse(avales_dict, safe=False)

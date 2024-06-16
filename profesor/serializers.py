@@ -14,4 +14,3 @@ class BiblioSerializer(serializers.ModelSerializer):
     class Meta:
         model = avales_biblio
         fields = '__all__'
-
