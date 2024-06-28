@@ -1,7 +1,6 @@
 from django.db import models
 
 
-
 class FormatoLibro(models.TextChoices):
     IMPRESO = "IMPRESO", "Libro Impreso"
     DIGITAL = "DIGITAL", "Libro Digital"
@@ -50,6 +49,7 @@ class avales_tuto(models.Model):
     tomo = models.CharField(max_length=50, blank=True)
     folio = models.CharField(max_length=50, blank=True)
     fecha = models.DateField(editable=True)
+    
 
     @property
     def nombre_completo(self):
@@ -62,11 +62,23 @@ class avales_tuto(models.Model):
 class avales_biblio(models.Model):
     nombre = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
-    titulo_recurso = models.CharField(max_length=500)
     departamento = models.CharField(max_length=200, blank=True)
     tomo = models.CharField(max_length=50, blank=True)
     folio = models.CharField(max_length=50, blank=True)
+    rev_bilio = models.CharField(max_length=100, blank=True)
+    niv_act = models.CharField(max_length=100, blank=True)
+    total_asient = models.CharField(max_length=100, blank=True)
     fecha = models.DateField(editable=True)
+    pag = models.CharField(max_length=50, blank=True)
+    fecha = models.DateField(editable=True)
+    bd_local = models.BooleanField(default=False)
+    cd_rom = models.BooleanField(default=False)
+    bd_internet = models.BooleanField(default=False)
+    curso_pos_bus = models.BooleanField(default=False)
+    busqueda_internet = models.BooleanField(default=False)
+    biblio_personal = models.BooleanField(default=False)
+    otros = models.BooleanField(default=False)
+    no_biblio = models.BooleanField(default=False)
 
     @property
     def nombre_completo(self):
@@ -74,4 +86,3 @@ class avales_biblio(models.Model):
 
     def __str__(self):
         return str(self.nombre)
-
