@@ -44,49 +44,33 @@ class BiblioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 class ReporteDepartamentoView(ListAPIView):
     serializer_class = None
-    # No usamos un serializer porque estamos retornando un diccionario directamente
 
     def get_queryset(self):
-        departamento = self.kwargs["departamento"]
-        profesores_filtrados = Profesor.objects.filter(
-            departamento__icontains=departamento
-        )
-        avales_tuto_filtrados = avales_tuto.objects.filter(
-            departamento__icontains=departamento
-        )
-        avales_biblio_filtrados = avales_biblio.objects.filter(
-            departamento__icontains=departamento
-        )
+        # Obtener el departamento desde los kwargs
+        departamento_clave = self.kwargs.get("departamento", None)
+        
+        if departamento_clave is None:
+            raise ValueError("Debe proporcionar un departamento.")
 
-        # Combina los resultados en Python
-        queryset = (
-            list(profesores_filtrados)
-            + list(avales_tuto_filtrados)
-            + list(avales_biblio_filtrados)
-        )
-        return queryset
+        avales_por_tipo = defaultdict(int)
+
+        modelos_relevantes = [Profesor, avales_tuto, avales_biblio]
+
+        for modelo in modelos_relevantes:
+            for obj in modelo.objects.filter(departamento=departamento_clave):
+                if hasattr(obj, "departamento"):
+                    avales_por_tipo[obj.__class__.__name__] += 1
+
+        reporte = {
+            "total_avales": sum(avales_por_tipo.values()),
+            "avales_por_tipo": dict(avales_por_tipo),
+        }
+
+        return reporte
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
-        reporte = {}
-        for avel in queryset:
-            fecha = avel.fecha.strftime("%d-%m-%Y")
-            if fecha not in reporte:
-                reporte[fecha] = []
-            reporte[fecha].append(
-                {
-                    "tipo": type(avel).__name__,
-                    "nombre_completo": getattr(
-                        avel, "nombre_completo", None
-                    ),  # Usar el nombre completo si está disponible
-                    "departamento": getattr(avel, "departamento", None),
-                    "fecha": fecha,
-                }
-            )
-
-        return JsonResponse(reporte)
-
+        return JsonResponse(queryset, safe=False)
 
 class ReporteTotalAvalessPorDepartamentoView(ListAPIView):
     serializer_class = None

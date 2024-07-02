@@ -23,6 +23,7 @@ class Profesor(models.Model):
     tomo = models.CharField(max_length=50, blank=True)
     folio = models.CharField(max_length=50, blank=True)
     tipo_publicacion = models.CharField(max_length=50)
+    grupo = models.CharField(max_length=50)
     lugar_pub = models.CharField("Lugar de Publicación", max_length=255)
     issn = models.CharField(max_length=10, blank=True)
     e_issn = models.CharField(max_length=10, blank=True)
