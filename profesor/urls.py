@@ -10,7 +10,7 @@ from profesor.views import (
     ReporteTotalAvalessPorDepartamentoView,
     ReporteTotalAvalessPorFechaView,
     AutoresListAPIView,
-    AvalProfesorListView,
+    AutorAvalListView,
 )
 
 urlpatterns = [
@@ -53,8 +53,8 @@ urlpatterns = [
     ),
     path("autores/", AutoresListAPIView.as_view(), name="api-list-autores"),
     path(
-        "avales-profesor/",
-        AvalProfesorListView.as_view(),
+        'avales-profesor/<int:id>/',
+        AutorAvalListView.as_view(),
         name="api-avales-profesor",
     ),
 ]

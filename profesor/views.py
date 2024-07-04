@@ -1,12 +1,19 @@
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 from django.http import JsonResponse
 from collections import defaultdict
+from django.db.models import Q
 
-from .models import Profesor, avales_tuto, avales_biblio
+from .models import Profesor, avales_tuto, avales_biblio, Autor
 
 
-from .serializers import ProfesorSerializer, TutoSerializer, BiblioSerializer
+from .serializers import (
+    ProfesorSerializer,
+    TutoSerializer,
+    BiblioSerializer,
+    AutorSerializer,
+)
 
 
 # aval de publicacion
@@ -48,7 +55,7 @@ class ReporteDepartamentoView(ListAPIView):
     def get_queryset(self):
         # Obtener el departamento desde los kwargs
         departamento_clave = self.kwargs.get("departamento", None)
-        
+
         if departamento_clave is None:
             raise ValueError("Debe proporcionar un departamento.")
 
@@ -71,6 +78,7 @@ class ReporteDepartamentoView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         return JsonResponse(queryset, safe=False)
+
 
 class ReporteTotalAvalessPorDepartamentoView(ListAPIView):
     serializer_class = None
@@ -132,68 +140,57 @@ class ReporteTotalAvalessPorFechaView(ListAPIView):
         return JsonResponse(queryset, safe=False)
 
 
-class AutoresListAPIView(ListAPIView):
-    serializer_class = None  # No necesitamos especificar un serializer_class aquí
-
-    def list(self, request, *args, **kwargs):
-        # Inicializar una lista vacía para almacenar los objetos de autor
-        autores = []
-
-        # Agregar información de Profesor
-        profesores = Profesor.objects.all()
-        for profesor in profesores:
-            autor_info = {
-                "nombre": profesor.nombre,
-                "apellidos": profesor.apellidos,
-                "departamento": profesor.departamento,
-            }
-            autores.append(autor_info)
-
-        # Agregar información de avales_tuto
-        tutores = avales_tuto.objects.all()
-        for tutor in tutores:
-            autor_info = {
-                "nombre": tutor.nombre,
-                "apellidos": tutor.apellidos,
-                "departamento": tutor.departamento,
-            }
-            autores.append(autor_info)
-
-        # Agregar información de avales_biblio
-        biblitecos = avales_biblio.objects.all()
-        for bibliteco in biblitecos:
-            autor_info = {
-                "nombre": bibliteco.nombre,
-                "apellidos": bibliteco.apellidos,
-                "departamento": bibliteco.departamento,
-            }
-            autores.append(autor_info)
-
-        # Devolver la lista de autores como una respuesta JSON
-        return JsonResponse(autores, safe=False)
-
-
-class AvalProfesorListView(ListAPIView):
-    serializer_class = None
+class AutoresListAPIView(generics.ListCreateAPIView):
+    queryset = (
+        Autor.objects.all()
+    )  # Puedes personalizar este queryset según sea necesario
+    serializer_class = AutorSerializer
 
     def get_queryset(self):
-        nombre = self.request.query_params.get("nombre")
-        apellidos = self.request.query_params.get("apellidos")
+        # Personaliza tu queryset aquí si es necesario
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                Q(profesores__isnull=False)
+                | Q(tutorias__isnull=False)
+                | Q(bibliografias__isnull=False)
+            )
+        )
 
-        profesores = Profesor.objects.filter(
-            nombre__icontains=nombre, apellidos__icontains=apellidos
-        )
-        tutores = avales_tuto.objects.filter(
-            nombre__icontains=nombre, apellidos__icontains=apellidos
-        )
-        biblitecos = avales_biblio.objects.filter(
-            nombre__icontains=nombre, apellidos__icontains=apellidos
-        )
+
+class AutorAvalListView(ListAPIView):
+    def get_queryset(self):
+        id = self.kwargs["id"]  # Cambiamos los parámetros a id para buscar por ID
+
+        # Filtramos por el autor usando el campo ForeignKey en los modelos de avales
+        profesores = Profesor.objects.filter(autor=id)
+        tutores = avales_tuto.objects.filter(autor=id)
+        biblitecos = avales_biblio.objects.filter(autor=id)
+
+        # Unimos los resultados en una sola lista
         avales = list(profesores) + list(tutores) + list(biblitecos)
         return avales
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        avales_dict = [obj.__dict__ for obj in queryset]
-        return JsonResponse(avales_dict, safe=False)
+        # Función para determinar el serializer basado en el tipo de objeto
+        def get_serializer(obj):
+            if isinstance(obj, Profesor):
+                return ProfesorSerializer(obj)
+            elif isinstance(obj, avales_tuto):
+                return TutoSerializer(obj)
+            elif isinstance(obj, avales_biblio):
+                return BiblioSerializer(obj)
+            else:
+                raise ValueError("Tipo de objeto desconocido")
+
+        # Aplicar el serializer adecuado a cada objeto en el conjunto de datos
+        serialized_data = []
+        for obj in queryset:
+            serializer = get_serializer(obj)
+            serialized_obj = serializer.to_representation(obj)
+            serialized_data.append(serialized_obj)
+
+        return Response(serialized_data)

@@ -1,18 +1,16 @@
 from django.db import models
 
 
-class FormatoLibro(models.TextChoices):
-    IMPRESO = "IMPRESO", "Libro Impreso"
-    DIGITAL = "DIGITAL", "Libro Digital"
-    RIMPRESA = "RIMPRESA", "Revista Impresa"
-    RDIGITAL = "DDIGITAL", "Revista Digital"
+class Autor(models.Model):
+    nombre = models.CharField(max_length=100)
+    apellidos = models.CharField(max_length=100)
+    departamento = models.CharField(max_length=200, blank=True)
 
+    class Meta:
+        verbose_name_plural = "autores"
 
-class TipoPublicacion(models.TextChoices):
-    LIBRO = "LIBRO", "Libro"
-    CAPITULO = "CAPITULO", "Capítulo"
-    EPIGRAFE = "EPIGRAFE", "Epígrafe"
-    ARTICULO = "ARTICULO", "Artículo"
+    def __str__(self):
+        return str(self.nombre)
 
 
 class Profesor(models.Model):
@@ -33,6 +31,9 @@ class Profesor(models.Model):
     url = models.URLField(blank=True)
     tipo_recurso = models.CharField(max_length=50)
     fecha = models.DateField(editable=True)
+    autor = models.ForeignKey(
+        Autor, on_delete=models.CASCADE, related_name="profesores", blank=True
+    )
 
     @property
     def nombre_completo(self):
@@ -50,7 +51,9 @@ class avales_tuto(models.Model):
     tomo = models.CharField(max_length=50, blank=True)
     folio = models.CharField(max_length=50, blank=True)
     fecha = models.DateField(editable=True)
-    
+    autor = models.ForeignKey(
+        Autor, on_delete=models.CASCADE, related_name="tutorias", blank=True
+    )
 
     @property
     def nombre_completo(self):
@@ -80,6 +83,9 @@ class avales_biblio(models.Model):
     biblio_personal = models.BooleanField(default=False)
     otros = models.BooleanField(default=False)
     no_biblio = models.BooleanField(default=False)
+    autor = models.ForeignKey(
+        Autor, on_delete=models.CASCADE, related_name="bibliografias", blank=True
+    )
 
     @property
     def nombre_completo(self):
