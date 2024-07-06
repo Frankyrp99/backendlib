@@ -13,29 +13,38 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
     class Meta:
         model = get_user_model()
-        fields = ["id","nombre", "apellidos", "email", "password", "role"]
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if instance.role == "admin":
-            representation["password"] = instance.password
-        return representation
-
+        fields = ["id", "nombre", "apellidos", "email", "role","password"]
+        extra_kwargs = {'email': {'required': False}}
     def create(self, validated_data):
         user = get_user_model().objects.create_user(**validated_data)
         return user
 
-    def update(self, _, validated_data):
-        password = validated_data.pop("password", None)
-        user = super().update(instance=validated_data)
+    def update(self, instance, validated_data):
+        password = validated_data.get("password")
+        email = validated_data.get("email")
+        
+        if email is not None and email != instance.email:
+            if (
+                self.Meta.model.objects.filter(email=email)
+                .exclude(id=instance.id)
+                .exists()
+            ):
+                raise serializers.ValidationError(
+                    {"email": "Ya existe un usuario con este email."}
+                )
+            else:
+                validated_data["email"] = email
+       
+        instance = super().update(instance, validated_data)
 
         if password:
-            user.set_password(password)
-            user.save()
-
-        return user
+            instance.set_password(password)
+            instance.save()
+        print(validated_data)
+        return instance
 
 
 class AuthTokenSerializer(serializers.Serializer):

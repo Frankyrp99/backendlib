@@ -8,15 +8,14 @@ from users.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-class CreateUserView(generics.CreateAPIView):
-    serializer_class = UserSerializer
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-class RetriveUpdateUserView(generics.RetrieveUpdateAPIView):
+
+class RetriveUpdateUserView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -25,13 +24,15 @@ class RetriveUpdateUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-class UserDeleteView(generics.DestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer, AuthTokenSerializer
-    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+class UpdateUserView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return self.get_queryset().get(pk=self.kwargs["pk"])
+
+        user_id = self.kwargs["pk"]
+        return User.objects.get(pk=user_id)
 
 
 # token
