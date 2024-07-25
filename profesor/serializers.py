@@ -12,7 +12,7 @@ class ProfesorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profesor
-        fields = "__all__"  # Asegúrate de incluir 'nombre_autor', 'apellidos_autor', 'departamento_autor' en los campos si planeas enviarlos desde el frontend
+        fields = "__all__"
 
     def get_tipo_aval(self, obj):
         return "Aval de Publicación"

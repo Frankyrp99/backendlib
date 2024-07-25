@@ -1,8 +1,8 @@
-from rest_framework import generics
+from collections import defaultdict
+from rest_framework import generics, authentication, permissions
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.http import JsonResponse
-from collections import defaultdict
 from django.db.models import Q
 
 from .models import Profesor, avales_tuto, avales_biblio, Autor
@@ -18,39 +18,54 @@ from .serializers import (
 
 # aval de publicacion
 class ProfesorListCreateView(generics.ListCreateAPIView):
-    queryset = Profesor.objects.all()
+    queryset = Profesor.objects.all().order_by('id') 
     serializer_class = ProfesorSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    
 
 
 class ProfesorRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Profesor.objects.all()
+    queryset = Profesor.objects.all().order_by('id') 
     serializer_class = ProfesorSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 # aval de tutorias
 class TutoListCreateView(generics.ListCreateAPIView):
-    queryset = avales_tuto.objects.all()
+    queryset = avales_tuto.objects.all().order_by('id') 
     serializer_class = TutoSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class TutoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = avales_tuto.objects.all()
+    queryset = avales_tuto.objects.all().order_by('id') 
     serializer_class = TutoSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 # aval de bibliografia
 class BiblioListCreateView(generics.ListCreateAPIView):
-    queryset = avales_biblio.objects.all()
+    queryset = avales_biblio.objects.all().order_by('id') 
     serializer_class = BiblioSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class BiblioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = avales_biblio.objects.all()
+    queryset = avales_biblio.objects.all().order_by('id') 
     serializer_class = BiblioSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ReporteDepartamentoView(ListAPIView):
     serializer_class = None
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         # Obtener el departamento desde los kwargs
@@ -64,7 +79,7 @@ class ReporteDepartamentoView(ListAPIView):
         modelos_relevantes = [Profesor, avales_tuto, avales_biblio]
 
         for modelo in modelos_relevantes:
-            for obj in modelo.objects.filter(departamento=departamento_clave):
+            for obj in modelo.objects.filter(departamento=departamento_clave).order_by('id') :
                 if hasattr(obj, "departamento"):
                     avales_por_tipo[obj.__class__.__name__] += 1
 
@@ -82,6 +97,8 @@ class ReporteDepartamentoView(ListAPIView):
 
 class ReporteTotalAvalessPorDepartamentoView(ListAPIView):
     serializer_class = None
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         # Conteo inicial de avales por departamento
@@ -106,6 +123,8 @@ class ReporteTotalAvalessPorDepartamentoView(ListAPIView):
 
 class ReporteTotalAvalessPorFechaView(ListAPIView):
     serializer_class = None
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
 
@@ -141,6 +160,9 @@ class ReporteTotalAvalessPorFechaView(ListAPIView):
 
 
 class AutoresListAPIView(generics.ListCreateAPIView):
+    serializer_class = None
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = (
         Autor.objects.all()
     )  # Puedes personalizar este queryset según sea necesario
@@ -160,8 +182,12 @@ class AutoresListAPIView(generics.ListCreateAPIView):
 
 
 class AutorAvalListView(ListAPIView):
+    serializer_class = None
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     def get_queryset(self):
-        id = self.kwargs["id"]  # Cambiamos los parámetros a id para buscar por ID
+        id = self.kwargs["id"]
 
         # Filtramos por el autor usando el campo ForeignKey en los modelos de avales
         profesores = Profesor.objects.filter(autor=id)
